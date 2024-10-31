@@ -1,5 +1,6 @@
 # lrh-web
 
+front end with the help of running back end named demo in the https://github.com/LiuRuohui/demo
 ## Project setup
 ```
 npm install
