@@ -1,0 +1,136 @@
+<template>
+    <div>
+        <div style="margin-bottom: 5px;">
+            <el-input v-model="name" placeholder="请输入物品名" suffix-icon="el-icon-search" style="width: 200px;"
+                      @keyup.enter.native="loadPost"></el-input>
+            <el-select v-model="storage" placeholder="请选择仓库" style="margin-left: 10px;">
+                <el-option
+                        v-for="item in storageData"
+                        :key="item.id"
+                        :label="item.name"
+                        :value="item.id">
+                </el-option>
+            </el-select>
+            <el-select v-model="goodsType" placeholder="请选择分类" style="margin-left: 10px;">
+                <el-option
+                        v-for="item in goodstypeData"
+                        :key="item.id"
+                        :label="item.name"
+                        :value="item.id">
+                </el-option>
+            </el-select>
+            <el-button type="primary" style="margin-left: 10px;" @click="loadPost">查询</el-button>
+            <el-button type="success" @click="resetParam">重置</el-button>
+
+            <el-button type="primary" style="margin-left: 10px;" @click="add">新增</el-button>
+        </div>
+        <el-table :data="tableData"
+                  :header-cell-style="{ background: '#f2f5fc', color: '#555555' }"
+                  border
+        >
+            <el-table-column prop="id" label="ID" width="60">
+            </el-table-column>
+            <el-table-column prop="name" label="物品名" width="180">
+            </el-table-column>
+            <el-table-column prop="storage" label="仓库" width="80">
+            </el-table-column>
+            <el-table-column prop="goodsType" label="分类" width="80">
+            </el-table-column>
+            <el-table-column prop="adminId" label="操作人" width="80">
+            </el-table-column>
+            <el-table-column prop="userId" label="申请人" width="80">
+            </el-table-column>
+            <el-table-column prop="count" label="数量" width="80">
+            </el-table-column>
+            <el-table-column prop="createTime" label="操作时间" width="180">
+            </el-table-column>
+            <el-table-column prop="remark" label="备注">
+            </el-table-column>
+        </el-table>
+        <el-pagination
+                @size-change="handleSizeChange"
+                @current-change="handleCurrentChange"
+                :current-page="pageNum"
+                :page-sizes="[5, 10, 20,30]"
+                :page-size="pageSize"
+                layout="total, sizes, prev, pager, next, jumper"
+                :total="total">
+        </el-pagination>
+    </div>
+</template>
+
+<script>
+    export default {
+        name: "RecordManage",
+        data() {
+            return {
+                storageData:[],
+                goodstypeData:[],
+                tableData: [],
+                pageSize:10,
+                pageNum:1,
+                total:0,
+                storage:'',
+                goodsType:'',
+                name:'',
+                centerDialogVisible:false,
+                form:{
+                    id:'',
+                    name:'',
+                    storage:'',
+                    goodsType:'',
+                    count:'',
+                    remark:''
+                },
+            }
+        },
+        methods:{
+            resetForm() {
+                this.$refs.form.resetFields();
+            },
+            handleSizeChange(val) {
+                console.log(`每页 ${val} 条`);
+                this.pageNum=1
+                this.pageSize=val
+                this.loadPost()
+            },
+            handleCurrentChange(val) {
+                console.log(`当前页: ${val}`);
+                this.pageNum=val
+                this.loadPost()
+            },
+            resetParam(){
+                this.name='',
+                this.storage=''
+                this.goodsType=''
+            },
+            loadPost(){
+                this.$axios.post(this.$httpUrl+'/record/listPage',{
+                    pageSize:this.pageSize,
+                    pageNum:this.pageNum,
+                    param:{
+                        name:this.name,
+                        goodsType:this.goodsType+'',
+                        storage:this.storage+''
+                    }
+                }).then(res=>res.data).then(res=>{
+                    console.log(res)
+                    if(res.code==200){
+                        this.tableData=res.data
+                        this.total=res.total
+                    }else{
+                        alert('获取数据失败')
+                    }
+
+                })
+            },
+        },
+        beforeMount() {
+            this.loadPost()
+        }
+    }
+</script>
+
+<style scoped>
+
+</style>
